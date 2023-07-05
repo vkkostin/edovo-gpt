@@ -7,11 +7,11 @@ global.__basedir = path.resolve() + "/..";
 
 const app = express();
 
-var corsOptions = {
-  origin: "https://www.vladickostin.com/"
-};
+// var corsOptions = {
+//   origin: "https://www.vladickostin.com/"
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
