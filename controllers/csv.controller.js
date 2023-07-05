@@ -1,5 +1,6 @@
-import { createReadStream } from 'fs';
+import { createReadStream, readdir, unlink } from 'fs';
 import { parse } from 'fast-csv';
+import path from "node:path";
 
 const upload = async (req, res) => {
   try {
@@ -33,4 +34,31 @@ const upload = async (req, res) => {
   }
 };
 
-export default {upload}
+const deleteFiles = async (req, res) => {
+  const directory = "./resources/static/assets/uploads";
+
+  try {
+    readdir(directory, (err, files) => {
+      if (err) throw err;
+    
+      for (const file of files) {
+        unlink(path.join(directory, file), (err) => {
+          if (err) throw err;
+        });
+      }
+    });
+
+    res.status(200).send({
+      message: "Deleted files successfully"
+    });
+  } catch (e) {
+    res.status(500).send({
+      message: "Failed to upload the file: " + e,
+    });
+  }
+}
+
+export default {
+  upload,
+  deleteFiles,
+}
