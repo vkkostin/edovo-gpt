@@ -1,6 +1,10 @@
-import { Router } from 'express';
-import csvController from '../controllers/csv.controller.js';
-import uploadFile from '../middleware/upload.js';
+const { Router } = require('express');
+const csvController = require('../controllers/csv.controller.js');
+const uploadFile = require('../middleware/upload.js');
+
+// import { Router } from 'express';
+// import csvController from '../controllers/csv.controller.js';
+// import uploadFile from '../middleware/upload.js';
 
 const router = Router();
 
@@ -12,7 +16,11 @@ let routes = (app) => {
 
   router.post('/submit', csvController.submit);
 
+  router.get('/download', csvController.download)
+
   app.use("/api", router);
 };
 
-export default routes;
+module.exports = routes;
+
+// export default routes;

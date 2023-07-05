@@ -1,7 +1,12 @@
-import express from 'express';
-import path from 'path';
-import cors from 'cors';
-import initRoutes from './routes/index.js';
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const initRoutes = require('./routes/index.js');
+
+// import express from 'express';
+// import path from 'path';
+// import cors from 'cors';
+// import initRoutes from './routes/index.js';
 
 global.__basedir = path.resolve() + "/..";
 

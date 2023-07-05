@@ -1,6 +1,12 @@
-import 'dotenv/config'
-import { createReadStream, } from 'fs';
-import { parse } from 'fast-csv';
+require('dotenv').config();
+const fs = require('fs');
+const {parse} = require('fast-csv');
+const {parseResponses} = require('../openai/single.js');
+
+// import { createReadStream, } from 'fs';
+// import { parse } from 'fast-csv';
+// import { parseResponses } from '../openai/single.js';
+
 
 const upload = async (req, res) => {
   try {
@@ -9,9 +15,9 @@ const upload = async (req, res) => {
     }
 
     let employees = [];
-    let path = "./resources/static/assets/uploads/" + req.file.filename;
+    let path = "./resources/static/assets/uploads/gpt.csv";
 
-    createReadStream(path)
+    fs.createReadStream(path)
       .pipe(parse({ headers: true }))
       .on("error", (error) => {
         throw error.message;
@@ -43,11 +49,41 @@ const getAPIKey = async (req, res) => {
 const submit = async (req, res) => {
   const {prompt} = req.body;
 
+  parseResponses(prompt);
+
   res.sendStatus(200);
 }
 
-export default {
+const download = async (req, res) => {
+  const filePath = "./resources/static/assets/uploads/output.csv";
+
+  // Check if the file exists
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error('File not found:', err);
+      res.status(404).send('File not found');
+      return;
+    }
+
+    // Set the appropriate headers for the file download
+    res.setHeader('Content-Disposition', 'attachment; filename="file.csv"');
+    res.setHeader('Content-Type', 'text/csv');
+
+    // Stream the file to the response
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  });
+}
+
+module.exports = {
   upload,
   getAPIKey,
   submit,
+  download,
 }
+
+// export default {
+//   upload,
+//   getAPIKey,
+//   submit,
+// }

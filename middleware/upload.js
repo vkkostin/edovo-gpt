@@ -1,5 +1,8 @@
-import fs from 'fs';
-import multer from 'multer';
+const fs = require('fs');
+const multer = require('multer');
+
+// import fs from 'fs';
+// import multer from 'multer';
 
 const storage = multer.diskStorage({
   destination: (_req, file, cb) => {
@@ -27,7 +30,12 @@ const csvFilter = (_req, file, cb) => {
   }
 };
 
-export default multer({
-    storage: storage,
-    fileFilter: csvFilter
+module.exports = multer({
+  storage: storage,
+  fileFilter: csvFilter
 });
+
+// export default multer({
+//     storage: storage,
+//     fileFilter: csvFilter
+// });
