@@ -11,8 +11,8 @@ const storage = multer.diskStorage({
     cb(null, dir);
   },
   filename: (_req, file, cb) => {
-    console.log(file.originalname);
-    cb(null, `${Date.now()}-${file.originalname}`);
+    console.log(`Writing ${file.originalname} to gpt.csv`);
+    cb(null, 'gpt.csv');
   },
 });
 

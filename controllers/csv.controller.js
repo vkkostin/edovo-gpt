@@ -1,7 +1,6 @@
 import 'dotenv/config'
-import { createReadStream, readdir, unlink } from 'fs';
+import { createReadStream, } from 'fs';
 import { parse } from 'fast-csv';
-import path from "node:path";
 
 const upload = async (req, res) => {
   try {
@@ -35,35 +34,11 @@ const upload = async (req, res) => {
   }
 };
 
-const deleteFiles = async (req, res) => {
-  const directory = "./resources/static/assets/uploads";
-
-  try {
-    readdir(directory, (err, files) => {
-      if (err) throw err;
-    
-      for (const file of files) {
-        unlink(path.join(directory, file), (err) => {
-          if (err) throw err;
-        });
-      }
-    });
-
-    res.status(200).send({
-      message: "Deleted files successfully"
-    });
-  } catch (e) {
-    res.status(500).send({
-      message: "Failed to upload the file: " + e,
-    });
-  }
-}
-
 const getAPIKey = async (req, res) => {
   res.status(200).send({
     api_key: process.env.OPENAI_API_KEY,
   });
-}
+};
 
 export default {
   upload,
