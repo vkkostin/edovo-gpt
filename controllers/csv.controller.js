@@ -42,6 +42,5 @@ const getAPIKey = async (req, res) => {
 
 export default {
   upload,
-  deleteFiles,
   getAPIKey,
 }
