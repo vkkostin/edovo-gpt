@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { createReadStream, readdir, unlink } from 'fs';
 import { parse } from 'fast-csv';
 import path from "node:path";
@@ -58,7 +59,14 @@ const deleteFiles = async (req, res) => {
   }
 }
 
+const getAPIKey = async (req, res) => {
+  res.status(200).send({
+    api_key: process.env.API_KEY,
+  });
+}
+
 export default {
   upload,
   deleteFiles,
+  getAPIKey,
 }
