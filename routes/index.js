@@ -10,6 +10,8 @@ let routes = (app) => {
 
   router.get('/api_key', csvController.getAPIKey);
 
+  router.post('/submit', csvController.submit);
+
   app.use("/api", router);
 };
 

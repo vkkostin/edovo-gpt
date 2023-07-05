@@ -40,7 +40,14 @@ const getAPIKey = async (req, res) => {
   });
 };
 
+const submit = async (req, res) => {
+  const {prompt} = req.body;
+
+  res.sendStatus(200);
+}
+
 export default {
   upload,
   getAPIKey,
+  submit,
 }
