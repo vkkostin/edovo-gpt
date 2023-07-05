@@ -8,7 +8,7 @@ global.__basedir = path.resolve() + "/..";
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:3000"
+  origin: "https://www.vladickostin.com/"
 };
 
 app.use(cors(corsOptions));
