@@ -1,17 +1,17 @@
 import express from 'express';
 import path from 'path';
-// import cors from 'cors';
+import cors from 'cors';
 import initRoutes from './routes/index.js';
 
 global.__basedir = path.resolve() + "/..";
 
 const app = express();
 
-// var corsOptions = {
-//   origin: "https://www.vladickostin.com/"
-// };
+var corsOptions = {
+  origin: "https://www.vladickostin.com/"
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
 app.use(express.json());
