@@ -61,7 +61,7 @@ const deleteFiles = async (req, res) => {
 
 const getAPIKey = async (req, res) => {
   res.status(200).send({
-    api_key: process.env.API_KEY,
+    api_key: process.env.OPENAI_API_KEY,
   });
 }
 
