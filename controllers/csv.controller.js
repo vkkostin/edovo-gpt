@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const {parse} = require('fast-csv');
 const {parseResponses} = require('../openai/single.js');
+const path = require('path');
 
 // import { createReadStream, } from 'fs';
 // import { parse } from 'fast-csv';
@@ -55,7 +56,7 @@ const submit = async (req, res) => {
 }
 
 const download = async (req, res) => {
-  const filePath = "./resources/static/assets/uploads/output.csv";
+  const filePath = path.join(__dirname, '../resources/static/assets/uploads/output.csv');
 
   // Check if the file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {
