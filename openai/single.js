@@ -77,8 +77,8 @@ async function processData() {
 
 	process.env.TOTAL_ITEMS = responses.length;
 
-	// const itemCount = responses.length;
-	const itemCount = 5;
+	const itemCount = responses.length;
+	// const itemCount = 5;
 
 	for (let i = 1; i < itemCount; i++) {
 		const item = responses[i];
