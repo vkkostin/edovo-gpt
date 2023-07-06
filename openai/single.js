@@ -17,6 +17,10 @@ let promptTemplate = '';
 let followUpPromptTemplate = '';
 let followUpPromptCondition = '';
 let hasFollowUpPrompt = false;
+let systemMessage = '';
+let hasSystemMessage = false;
+let hasTemperature = false;
+let temperature = '';
 
 function buildPrompt(template, question, answer) {
 	let prompt = template;
@@ -41,8 +45,11 @@ async function getResponse(prompt, index, question, answer) {
 		const response = await backOff(() => {
 			return openai.createChatCompletion({
 				model: 'gpt-3.5-turbo-0613',
-				messages: [{role: 'user', content: prompt}],
-				temperature: 0.7,
+				messages: [
+					...(hasSystemMessage ? [{role: 'system', content: systemMessage}] : []),
+					{role: 'user', content: prompt},
+				],
+				temperature: hasTemperature ? parseFloat(temperature) : 0.7,
 			});
 		})
 		console.log('--- Finished Processing Prompt ---');
@@ -69,11 +76,12 @@ async function processChatCompletionData(data, firstPrompt, question, answer) {
 			return openai.createChatCompletion({
 				model: 'gpt-3.5-turbo-0613',
 				messages: [
+					...(hasSystemMessage ? [{role: 'system', content: systemMessage}] : []),
 					{role: 'user', content: firstPrompt},
 					{role: 'assistant', content: data.choices[0].message.content},
 					{role: 'user', content: followUpPrompt}
 				],
-				temperature: 0.7,
+				temperature: hasTemperature ? parseFloat(temperature) : 0.7,
 			});
 		});
 
@@ -100,7 +108,7 @@ async function processData() {
 	process.env.TOTAL_ITEMS = responses.length;
 
 	const itemCount = responses.length - 1;
-	// const itemCount = 11;
+	// const itemCount = 5;
 
 	for (let i = 1; i < itemCount; i++) {
 		const item = responses[i];
@@ -122,6 +130,8 @@ async function processData() {
 			answer,
 			...assessment,
 			latency,
+			...(hasSystemMessage ? [systemMessage] : []),
+			...(hasTemperature ? [temperature] : []),
 		]);
 
 	}
@@ -148,6 +158,8 @@ function generateOutput() {
 		'completion_tokens',
 		'total_tokens',
 		'latency',
+		...(hasSystemMessage ? ['system_message'] : []),
+		...(hasTemperature ? ['temperature'] : []),
 	];
 
 	const stringifier = stringify({ header: true, columns: columns });
@@ -171,9 +183,11 @@ function reset() {
 	hasFollowUpPrompt = false;
 	responses = [];
 	evaluations = [];
+	hasSystemMessage = false;
+	hasTemperature = false;
 }
 
-const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition) => {
+const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition, newSystemMessage, newTemperature) => {
 	process.env.IS_PROCESSING_DATA = 'true';
 	promptTemplate = newPrompt;
 
@@ -181,6 +195,16 @@ const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition
 		hasFollowUpPrompt = true;
 		followUpPromptTemplate = newFollowUpPrompt;
 		followUpPromptCondition = newFollowUpPromptCondition;
+	}
+
+	if (newSystemMessage) {
+		hasSystemMessage = true;
+		systemMessage = newSystemMessage
+	}
+
+	if (newTemperature) {
+		hasTemperature = true;
+		temperature = newTemperature
 	}
 
     const path = './resources/static/assets/uploads/gpt.csv';

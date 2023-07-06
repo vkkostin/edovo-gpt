@@ -48,7 +48,7 @@ const getAPIKey = async (req, res) => {
 };
 
 const submit = async (req, res) => {
-  const {prompt, followUpPrompt, followUpPromptCondition} = req.body;
+  const {prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature} = req.body;
 
   if (process.env.IS_PROCESSING_DATA === 'true') {
     res.status(429).send({
@@ -59,7 +59,7 @@ const submit = async (req, res) => {
     return
   }
 
-  parseResponses(prompt, followUpPrompt, followUpPromptCondition);
+  parseResponses(prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature);
 
   res.sendStatus(200);
 }
