@@ -70,23 +70,21 @@ async function processChatCompletionData(data) {
 }
 
 async function processData() {
-	const headers = responses[0];
+	const [headers] = responses;
 	const lessonNameIndex = headers.indexOf('lesson_name');
 	const questionIndex = headers.indexOf('question');
-	const answerIdIndex = headers.indexOf('answer_id');
-	const answerIndex = headers.indexOf('student_answer');
+	const answerIndex = headers.indexOf('answer');
 
 	process.env.TOTAL_ITEMS = responses.length;
 
-	// const itemCount = responses.length;
-	const itemCount = 10;
+	const itemCount = responses.length;
+	// const itemCount = 10;
 
 	for (let i = 1; i < itemCount; i++) {
 		const item = responses[i];
 		const lessonName = item[lessonNameIndex];
 		const { stripHtml } = await import('string-strip-html');
 		const question = stripHtml(item[questionIndex]).result;
-		const answerId = item[answerIdIndex];
 		const answer = item[answerIndex];
 		const prompt = buildPrompt(question, answer);
 		const start = Date.now();
@@ -99,7 +97,6 @@ async function processData() {
 		evaluations.push([
 			lessonName,
 			question,
-			answerId,
 			answer,
 			...assessment,
 			latency,
@@ -123,8 +120,7 @@ function generateOutput() {
 	const columns = [
 		'lesson_name',
 		'question',
-		'answer_id',
-		'student_answer',
+		'answer',
 		'score',
 		'prompt_tokens',
 		'completion_tokens',
