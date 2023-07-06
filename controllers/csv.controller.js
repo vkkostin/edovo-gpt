@@ -50,12 +50,30 @@ const getAPIKey = async (req, res) => {
 const submit = async (req, res) => {
   const {prompt} = req.body;
 
+  if (process.env.IS_PROCESSING_DATA === 'true') {
+    res.status(429).send({
+      currentItem: process.env.CURRENT_ITEM,
+      totalItems: process.env.TOTAL_ITEMS,
+    });
+
+    return
+  }
+
   parseResponses(prompt);
 
   res.sendStatus(200);
 }
 
 const download = async (req, res) => {
+  if (process.env.IS_PROCESSING_DATA === 'true') {
+    res.status(429).send({
+      currentItem: process.env.CURRENT_ITEM,
+      totalItems: process.env.TOTAL_ITEMS,
+    });
+
+    return
+  }
+
   const filePath = path.join(__dirname, '../resources/static/assets/uploads/output.csv');
 
   // Check if the file exists

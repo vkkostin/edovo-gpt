@@ -4,7 +4,6 @@ const { Configuration, OpenAIApi } = require('openai');
 const fs = require('fs');
 const { parse } = require('csv-parse');
 const { stringify } = require('csv-stringify');
-// const { stripHtml } = require('string-strip-html');
 const { backOff } = require('exponential-backoff');
 
 const configuration = new Configuration({
@@ -12,15 +11,28 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const responses = [];
-const evaluations = [];
+let responses = [];
+let evaluations = [];
+let promptTemplate = '';
 
 function buildPrompt(question, answer) {
-	return `How complete is the answer below with regard to the associated question? Use the following rubric: 2 - Completely answers all parts of the question, 1 - Partially answers the question, 0 - Does not answer question. Your response should just be the number that is your score. Do not provide additional information.\nQuestion: "${question}"\nAnswer: "${answer}"`;
+	let prompt = promptTemplate;
+	
+	if (prompt.includes('{{question}}')) {
+		prompt = prompt.replace(/{{question}}/g, `"${question}"`);
+	}
+
+
+	if (prompt.includes('{{answer}}')) {
+		prompt = prompt.replace(/{{answer}}/g, `"${answer}"`);
+	}
+
+	return prompt;
 }
 
 async function getResponse(content, index) {
 	try {
+		process.env.CURRENT_ITEM = index;
 		console.log(`--- Processing Prompt ${index + 1} / ${responses.length} ---`);
 		console.log(content);
 		const response = await backOff(() => {
@@ -43,9 +55,11 @@ async function getResponse(content, index) {
 async function processChatCompletionData(data) {
 	const { prompt_tokens, completion_tokens, total_tokens} = data.usage;
 
-	const score = parseInt(data.choices[0].message.content, 10);
+	let score = parseInt(data.choices[0].message.content, 10);
 
-	console.log('Score: ', score);
+	if (isNaN(score)) {
+		score = data.choices[0].message.content;
+	}
 
 	return [
 		score,
@@ -56,25 +70,25 @@ async function processChatCompletionData(data) {
 }
 
 async function processData() {
-	const headers = responses.shift();
+	const headers = responses[0];
 	const lessonNameIndex = headers.indexOf('lesson_name');
 	const questionIndex = headers.indexOf('question');
 	const answerIdIndex = headers.indexOf('answer_id');
 	const answerIndex = headers.indexOf('student_answer');
 
-	// const itemCount = responses.length;
-	const itemCount = 5;
+	process.env.TOTAL_ITEMS = responses.length;
 
-	for (let i = 0; i < itemCount; i++) {
+	// const itemCount = responses.length;
+	const itemCount = 10;
+
+	for (let i = 1; i < itemCount; i++) {
 		const item = responses[i];
 		const lessonName = item[lessonNameIndex];
-
 		const { stripHtml } = await import('string-strip-html');
-
 		const question = stripHtml(item[questionIndex]).result;
 		const answerId = item[answerIdIndex];
 		const answer = item[answerIndex];
-		const prompt = buildPrompt(lessonName, question, answer);
+		const prompt = buildPrompt(question, answer);
 		const start = Date.now();
 		const assessment = await getResponse(prompt, i);
 		const end = Date.now();
@@ -87,13 +101,16 @@ async function processData() {
 			question,
 			answerId,
 			answer,
-			latency,
 			...assessment,
+			latency,
+			prompt,
 		]);
 
 	}
 
 	console.log('100% Complete');
+
+	process.env.IS_PROCESSING_DATA = 'false';
 
 	generateOutput();
 }
@@ -108,11 +125,12 @@ function generateOutput() {
 		'question',
 		'answer_id',
 		'student_answer',
-		'latency',
 		'score',
 		'prompt_tokens',
 		'completion_tokens',
 		'total_tokens',
+		'latency',
+		'prompt',
 	];
 
 	const stringifier = stringify({ header: true, columns: columns });
@@ -126,7 +144,12 @@ function processRow(row) {
 	responses.push(row)
 }
 
-const parseResponses = (prompt) => {
+const parseResponses = (newPrompt) => {
+	process.env.IS_PROCESSING_DATA = 'true';
+	responses = [];
+	evaluations = [];
+	promptTemplate = newPrompt;
+
     const path = './resources/static/assets/uploads/gpt.csv';
 
 	fs.createReadStream(path)
@@ -136,5 +159,3 @@ const parseResponses = (prompt) => {
 }
 
 module.exports = {parseResponses}
-
-// export {parseResponses}
