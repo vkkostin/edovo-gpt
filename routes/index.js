@@ -16,7 +16,9 @@ let routes = (app) => {
 
   router.post('/submit', csvController.submit);
 
-  router.get('/download', csvController.download)
+  router.get('/download', csvController.download);
+
+  router.get('/progress', csvController.progress);
 
   app.use("/api", router);
 };

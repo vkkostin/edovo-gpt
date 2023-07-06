@@ -108,6 +108,8 @@ async function processData() {
 	console.log('100% Complete');
 
 	process.env.IS_PROCESSING_DATA = 'false';
+	process.env.TOTAL_ITEMS = 0;
+	process.env.CURRENT_ITEM = 0;
 
 	generateOutput();
 }

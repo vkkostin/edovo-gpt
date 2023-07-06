@@ -94,11 +94,19 @@ const download = async (req, res) => {
   });
 }
 
+const progress = async (req, res) => {
+  res.status(200).send({
+    currentItem: process.env.CURRENT_ITEM,
+    totalItems: process.env.TOTAL_ITEMS,
+  });
+}
+
 module.exports = {
   upload,
   getAPIKey,
   submit,
   download,
+  progress,
 }
 
 // export default {
