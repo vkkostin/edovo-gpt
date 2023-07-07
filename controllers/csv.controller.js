@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const {parse} = require('fast-csv');
-const {parseResponses} = require('../openai/single.js');
+const {parseResponses, getModels} = require('../openai/single.js');
 const path = require('path');
 
 // import { createReadStream, } from 'fs';
@@ -48,7 +48,7 @@ const getAPIKey = async (req, res) => {
 };
 
 const submit = async (req, res) => {
-  const {prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature} = req.body;
+  const {prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature, model} = req.body;
 
   if (process.env.IS_PROCESSING_DATA === 'true') {
     res.status(429).send({
@@ -59,7 +59,7 @@ const submit = async (req, res) => {
     return
   }
 
-  parseResponses(prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature);
+  parseResponses(prompt, followUpPrompt, followUpPromptCondition, systemMessage, temperature, model);
 
   res.sendStatus(200);
 }
@@ -101,16 +101,20 @@ const progress = async (req, res) => {
   });
 }
 
+const models = async (req, res) => {
+  try {
+    const models = await getModels();
+    res.status(200).send(models.data);
+  } catch (e) {
+    res.status(200).send([]);
+  }
+}
+
 module.exports = {
   upload,
   getAPIKey,
   submit,
   download,
   progress,
+  models,
 }
-
-// export default {
-//   upload,
-//   getAPIKey,
-//   submit,
-// }

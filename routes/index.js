@@ -20,6 +20,8 @@ let routes = (app) => {
 
   router.get('/progress', csvController.progress);
 
+  router.get('/models', csvController.models);
+
   app.use("/api", router);
 };
 

@@ -21,6 +21,7 @@ let systemMessage = '';
 let hasSystemMessage = false;
 let hasTemperature = false;
 let temperature = '';
+let model = 'gpt-3.5-turbo-0613';
 
 function buildPrompt(template, question, answer) {
 	let prompt = template;
@@ -38,13 +39,15 @@ function buildPrompt(template, question, answer) {
 }
 
 async function getResponse(prompt, index, question, answer) {
+	console.log(model);
+
 	try {
 		process.env.CURRENT_ITEM = index;
 		console.log(`--- Processing Prompt ${index + 1} / ${responses.length} ---`);
 		console.log(prompt);
 		const response = await backOff(() => {
 			return openai.createChatCompletion({
-				model: 'gpt-3.5-turbo-0613',
+				model,
 				messages: [
 					...(hasSystemMessage ? [{role: 'system', content: systemMessage}] : []),
 					{role: 'user', content: prompt},
@@ -74,7 +77,7 @@ async function processChatCompletionData(data, firstPrompt, question, answer) {
 
 		const response = await backOff(() => {
 			return openai.createChatCompletion({
-				model: 'gpt-3.5-turbo-0613',
+				model,
 				messages: [
 					...(hasSystemMessage ? [{role: 'system', content: systemMessage}] : []),
 					{role: 'user', content: firstPrompt},
@@ -185,9 +188,10 @@ function reset() {
 	evaluations = [];
 	hasSystemMessage = false;
 	hasTemperature = false;
+	model = 'gpt-3.5-turbo-0613';
 }
 
-const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition, newSystemMessage, newTemperature) => {
+const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition, newSystemMessage, newTemperature, newModel) => {
 	process.env.IS_PROCESSING_DATA = 'true';
 	promptTemplate = newPrompt;
 
@@ -207,6 +211,10 @@ const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition
 		temperature = newTemperature
 	}
 
+	if (newModel) {
+		model = newModel;
+	}
+
     const path = './resources/static/assets/uploads/gpt.csv';
 
 	fs.createReadStream(path)
@@ -215,4 +223,8 @@ const parseResponses = (newPrompt, newFollowUpPrompt, newFollowUpPromptCondition
 		.on('close', processData);
 }
 
-module.exports = {parseResponses}
+const getModels = () => {
+	return openai.listModels();
+}
+
+module.exports = {parseResponses, getModels}
